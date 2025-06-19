@@ -1,0 +1,244 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Enhanced GitHub Dark Theme Colors with modern accents */
+    --background: 220 13% 9%;        /* #0d1117 - GitHub dark background */
+    --foreground: 213 31% 91%;       /* #e6edf3 - GitHub text */
+
+    --card: 220 13% 11%;             /* #161b22 - GitHub card background with subtle enhancement */
+    --card-foreground: 213 31% 91%;  /* #e6edf3 */
+
+    --popover: 220 13% 11%;          /* #161b22 */
+    --popover-foreground: 213 31% 91%; /* #e6edf3 */
+
+    --primary: 217 91% 60%;          /* #3b82f6 - Modern blue primary */
+    --primary-foreground: 213 31% 91%; /* #e6edf3 */
+
+    --secondary: 220 13% 15%;        /* #21262d - GitHub secondary bg */
+    --secondary-foreground: 213 31% 91%; /* #e6edf3 */
+
+    --muted: 220 13% 15%;            /* #21262d */
+    --muted-foreground: 215 15% 65%; /* #7d8590 - GitHub muted text */
+
+    --accent: 220 13% 15%;           /* #21262d */
+    --accent-foreground: 213 31% 91%; /* #e6edf3 */
+
+    --destructive: 0 84% 60%;        /* #f85149 - GitHub red */
+    --destructive-foreground: 213 31% 91%; /* #e6edf3 */
+
+    --border: 220 13% 18%;           /* #30363d - GitHub border */
+    --input: 220 13% 15%;            /* #21262d - GitHub input bg */
+    --ring: 217 91% 60%;             /* #3b82f6 - Modern focus ring */
+
+    --sidebar-background: 220 13% 9%; /* #0d1117 */
+    --sidebar-foreground: 215 15% 65%; /* #7d8590 */
+    --sidebar-primary: 217 91% 60%;   /* #3b82f6 */
+    --sidebar-primary-foreground: 213 31% 91%; /* #e6edf3 */
+    --sidebar-accent: 220 13% 15%;    /* #21262d */
+    --sidebar-accent-foreground: 213 31% 91%; /* #e6edf3 */
+    --sidebar-border: 220 13% 18%;    /* #30363d */
+    --sidebar-ring: 217 91% 60%;      /* #3b82f6 */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
+    background-attachment: fixed;
+  }
+
+  html {
+    @apply dark;
+  }
+
+  /* Enhanced scrollbars */
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-lg;
+    transition: background-color 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+
+  /* Enhanced focus rings */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary/50 ring-offset-2 ring-offset-background;
+    transition: box-shadow 0.2s ease;
+  }
+
+  /* Better typography */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  /* Enhanced code blocks */
+  code {
+    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+  }
+
+  pre {
+    @apply bg-muted p-4 rounded-lg overflow-x-auto;
+  }
+
+  /* Smooth transitions for interactive elements */
+  button, a, [role="button"], input, textarea, select {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Glow effects for inputs */
+  input:focus, textarea:focus {
+    box-shadow: 0 0 0 1px hsl(var(--primary)), 
+                0 0 20px hsla(var(--primary), 0.1);
+  }
+}
+
+/* Custom utility classes for modern UI */
+@layer utilities {
+  .text-github-muted {
+    color: hsl(var(--muted-foreground));
+  }
+  
+  .bg-github-card {
+    background-color: hsl(var(--card));
+  }
+  
+  .border-github {
+    border-color: hsl(var(--border));
+  }
+  
+  .hover-github {
+    @apply hover:bg-muted/50 transition-colors;
+  }
+
+  /* Glow effects */
+  .glow-primary {
+    box-shadow: 0 0 20px hsla(var(--primary), 0.15);
+  }
+
+  .glow-primary-lg {
+    box-shadow: 0 0 40px hsla(var(--primary), 0.2);
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  .card-hover:hover {
+    @apply scale-[1.02] shadow-xl;
+    box-shadow: 0 0 30px hsla(var(--primary), 0.1);
+  }
+
+  /* Gradient text effects */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-primary/90 to-primary/80 bg-clip-text text-transparent;
+  }
+
+  /* Glass morphism effects */
+  .glass {
+    @apply bg-background/80 backdrop-blur-lg border border-border/50;
+  }
+
+  /* Modern button effects */
+  .btn-glow {
+    @apply transition-all duration-200;
+    box-shadow: 0 4px 15px hsla(var(--primary), 0.2);
+  }
+
+  .btn-glow:hover {
+    @apply scale-105;
+    box-shadow: 0 8px 25px hsla(var(--primary), 0.3);
+  }
+
+  /* Subtle animations */
+  .fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

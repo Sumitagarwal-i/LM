@@ -1,0 +1,63 @@
+/* Modern reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Remove default styles that might conflict with our design */
+body {
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* Ensure smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden !important;
+  background-color: #000 !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+}
+
+#root {
+  height: 100%;
+  width: 100vw;
+  background: #000 !important;
+}
+
+.result-box {
+  background: #1a1a1a;
+  color: #f5f5f5;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 32px 0 rgba(0,0,0,0.25);
+  max-height: 60vh;
+  overflow-y: auto;
+  margin-bottom: 1.5rem;
+  animation: fadeInResult 0.4s cubic-bezier(0.4,0,0.2,1);
+  scroll-behavior: smooth;
+}
+
+.result-box::-webkit-scrollbar {
+  width: 8px;
+  background: #121212;
+  border-radius: 8px;
+}
+.result-box::-webkit-scrollbar-thumb {
+  background: #4b4b4b;
+  border-radius: 8px;
+}
+
+@keyframes fadeInResult {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
