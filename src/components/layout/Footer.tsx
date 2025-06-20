@@ -17,7 +17,7 @@ export const Footer: React.FC<FooterProps> = ({ onFeedbackModalOpen }) => {
             
             <span className="font-medium text-foreground">QyVante</span>
             <span>Product</span>
-            <a href='https://qyvante.vercel.app/' target='_blank'><SquareArrowUpRight className="h-5 w-5"/></a>
+            {/* <a href='https://qyvante.vercel.app/' target='_blank'><SquareArrowUpRight className="h-5 w-5"/></a> */}
           </div>
           
           {/* <Button

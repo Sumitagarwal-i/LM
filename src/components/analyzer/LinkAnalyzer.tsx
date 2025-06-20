@@ -9,7 +9,8 @@ import { ResultPanel } from '@/components/ResultPanel';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Link as LinkIcon, X as XIcon } from 'lucide-react';
+import { Loader2, Link as LinkIcon, X as XIcon, FileText } from 'lucide-react';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface LinkAnalysis {
   type: string;
@@ -54,6 +55,22 @@ export const LinkAnalyzer: React.FC<LinkAnalyzerProps> = ({
   const [isExecuting, setIsExecuting] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+
+
+  // Supported content types for the docs modal
+  const supportedContentTypes = [
+    "GitHub repository",
+    "blog post",
+    "product page",
+    "YouTube sitcom",
+    "YouTube movie",
+    "YouTube video",
+    "documentation",
+    "news article",
+    "portfolio",
+    "forum post",
+    "movie review"
+  ];
 
   const analyzeLink = async () => {
     if (!url.trim()) {
@@ -199,6 +216,26 @@ export const LinkAnalyzer: React.FC<LinkAnalyzerProps> = ({
           <CardTitle className="flex items-center gap-2">
             <LinkIcon className="h-5 w-5" />
             Link Analyzer
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="p-1 ml-1" title="Supported Content Types">
+                  <FileText className="h-5 w-5 text-muted-foreground hover:text-primary" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Supported Content Types</DialogTitle>
+                  <DialogDescription>
+                    The following content types are fully supported for specialized actions:
+                  </DialogDescription>
+                </DialogHeader>
+                <ul className="list-disc pl-6 space-y-1 text-sm">
+                  {supportedContentTypes.map(type => (
+                    <li key={type}>{type}</li>
+                  ))}
+                </ul>
+              </DialogContent>
+            </Dialog>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
