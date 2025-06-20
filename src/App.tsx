@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
+import { Analytics } from '@vercel/analytics/react';
 
 const queryClient = new QueryClient();
 
@@ -123,6 +124,7 @@ const App = () => {
           </ThemeProvider>
         </AuthProvider>
       </QueryClientProvider>
+      <Analytics/>
     </div>
   );
 };
