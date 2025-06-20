@@ -77,6 +77,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 
                 LinkMage
               </h1>
+              <h6 className='border-primary border py-1 px-3 rounded-3xl text-xs mt-1 ml-1 bg-primary/10'>Beta</h6>
             </div>
           </div>
 
