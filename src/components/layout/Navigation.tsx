@@ -70,19 +70,20 @@ export const Navigation: React.FC<NavigationProps> = ({
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center gap-2">
-            <img src={logo1} alt="LinkMage Logo" className="w-10 h-10 object-contain" />
-                            <h1 className="text-2xl md:text-2xl font-bold tracking-tight via-white-800  bg-clip-text drop-shadow-lg font-sans ">
-
-                LinkMage
-              </h1>
-              <h6 className='border-primary border py-1 px-3 rounded-3xl text-xs mt-1 ml-1 bg-primary/10'>Beta</h6>
+          <div className="flex items-center space-x-3 min-w-0 md:flex-none">
+            <div className="flex items-center gap-2 min-w-0">
+              <img src={logo1} alt="LinkMage Logo" className="w-8 h-8 sm:w-10 sm:h-10 object-contain flex-shrink-0" />
+              <div className="flex items-center gap-1 min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight via-white-800 bg-clip-text drop-shadow-lg font-sans truncate">
+                  LinkMage
+                </h1>
+                <h6 className='border-primary border py-0.5 px-2 sm:px-3 rounded-3xl text-xs mt-1 ml-1 bg-primary/10 flex-shrink-0'>Beta</h6>
+              </div>
             </div>
           </div>
 
           {/* Navigation Tabs - Desktop */}
-          <div className="hidden md:flex space-x-1">
+          <div className="hidden md:flex space-x-1 absolute left-1/2 transform -translate-x-1/2">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -104,11 +105,12 @@ export const Navigation: React.FC<NavigationProps> = ({
           </div>
 
           {/* User Menu & Actions */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
             <Button
               variant="ghost"
               onClick={onFeedbackModalOpen}
-              className="gap-2 hover:bg-muted/50 transition-colors duration-200"
+              size="sm"
+              className="gap-1 sm:gap-2 hover:bg-muted/50 transition-colors duration-200 p-2 sm:p-2"
             >
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">Feedback</span>
@@ -116,14 +118,14 @@ export const Navigation: React.FC<NavigationProps> = ({
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-2 hover:bg-muted/50 transition-all duration-200">
-                  <Avatar className="h-6 w-6">
+                <Button variant="ghost" size="sm" className="gap-1 sm:gap-2 hover:bg-muted/50 transition-all duration-200 p-2 sm:p-2">
+                  <Avatar className="h-5 w-5 sm:h-6 sm:w-6">
                     <AvatarFallback className="text-xs bg-gradient-to-br from-primary/10 to-primary/5">
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
                   {isGuest && (
-                    <Badge variant="outline" className="text-xs border-primary/20 text-primary">
+                    <Badge variant="outline" className="text-xs border-primary/20 text-primary hidden sm:inline-flex">
                       Guest
                     </Badge>
                   )}
