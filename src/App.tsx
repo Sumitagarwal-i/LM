@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from "@vercel/speed-insights/react"
 
 const queryClient = new QueryClient();
 
@@ -125,6 +126,7 @@ const App = () => {
         </AuthProvider>
       </QueryClientProvider>
       <Analytics/>
+      <SpeedInsights/>
     </div>
   );
 };
