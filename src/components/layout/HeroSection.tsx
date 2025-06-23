@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Brain, Sparkles } from 'lucide-react';
 
@@ -32,3 +31,5 @@ export const HeroSection: React.FC = () => {
     </div>
   );
 };
+
+export default HeroSection;

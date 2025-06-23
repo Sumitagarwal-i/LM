@@ -154,3 +154,5 @@ export const NotesScreen: React.FC<NotesScreenProps> = ({
     </div>
   );
 };
+
+export default NotesScreen;

@@ -16,15 +16,15 @@ interface LinkHistoryItem {
   created_at: string;
 }
 
-// Lazy load non-critical components
-const HistoryScreen = lazy(() => import('@/components/history/HistoryScreen'));
-const NotesScreen = lazy(() => import('@/components/notes/NotesScreen'));
-const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
-const ResultPanel = lazy(() => import('@/components/ResultPanel'));
-const HeroSection = lazy(() => import('@/components/layout/HeroSection'));
-const FeedbackModal = lazy(() => import('@/components/layout/FeedbackModal'));
-const Footer = lazy(() => import('@/components/layout/Footer'));
-const AuthModal = lazy(() => import('@/components/auth/AuthModal'));
+// Only lazy-load components that are default exports and exist
+const HistoryScreen = React.lazy(() => import('@/components/history/HistoryScreen'));
+const NotesScreen = React.lazy(() => import('@/components/notes/NotesScreen'));
+const SettingsPage = React.lazy(() => import('@/components/settings/SettingsPage'));
+const ResultPanel = React.lazy(() => import('@/components/ResultPanel'));
+const HeroSection = React.lazy(() => import('@/components/layout/HeroSection'));
+const FeedbackModal = React.lazy(() => import('@/components/layout/FeedbackModal'));
+const Footer = React.lazy(() => import('@/components/layout/Footer'));
+const AuthModal = React.lazy(() => import('@/components/auth/AuthModal'));
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('analyzer');

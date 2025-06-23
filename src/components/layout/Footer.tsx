@@ -33,3 +33,5 @@ export const Footer: React.FC<FooterProps> = ({ onFeedbackModalOpen }) => {
     </footer>
   );
 };
+
+export default Footer;

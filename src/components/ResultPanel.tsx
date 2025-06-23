@@ -160,3 +160,5 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ result, onClose }) => 
     </Card>
   );
 };
+
+export default ResultPanel;
