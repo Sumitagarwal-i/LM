@@ -1,16 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
-import { AuthModal } from '@/components/auth/AuthModal';
 import { LinkAnalyzer } from '@/components/analyzer/LinkAnalyzer';
-import { HistoryScreen } from '@/components/history/HistoryScreen';
-import { NotesScreen } from '@/components/notes/NotesScreen';
-import { SettingsPage } from '@/components/settings/SettingsPage';
-import { ResultPanel } from '@/components/ResultPanel';
-import { HeroSection } from '@/components/layout/HeroSection';
-import { FeedbackModal } from '@/components/layout/FeedbackModal';
-import { Footer } from '@/components/layout/Footer';
 import { useAuth } from '@/contexts/AuthContext';
-import { AiNote } from '@/components/notes/NotesScreen';
 import { guestStorage } from '@/utils/guestStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -24,6 +15,16 @@ interface LinkHistoryItem {
   analysis_data: any;
   created_at: string;
 }
+
+// Lazy load non-critical components
+const HistoryScreen = lazy(() => import('@/components/history/HistoryScreen'));
+const NotesScreen = lazy(() => import('@/components/notes/NotesScreen'));
+const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
+const ResultPanel = lazy(() => import('@/components/ResultPanel'));
+const HeroSection = lazy(() => import('@/components/layout/HeroSection'));
+const FeedbackModal = lazy(() => import('@/components/layout/FeedbackModal'));
+const Footer = lazy(() => import('@/components/layout/Footer'));
+const AuthModal = lazy(() => import('@/components/auth/AuthModal'));
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('analyzer');
@@ -166,23 +167,25 @@ const Index = () => {
       case 'analyzer':
         return (
           <div className="space-y-8">
-            <HeroSection />
-            <LinkAnalyzer
-              url={analyzerUrl}
-              setUrl={setAnalyzerUrl}
-              analysis={analyzerAnalysis}
-              setAnalysis={setAnalyzerAnalysis}
-              result={analyzerResult}
-              setResult={setAnalyzerResult}
-              actionSetsShown={analyzerActionSetsShown}
-              setActionSetsShown={setAnalyzerActionSetsShown}
-            />
+            <Suspense fallback={<div>Loading...</div>}>
+              <HeroSection />
+              <LinkAnalyzer
+                url={analyzerUrl}
+                setUrl={setAnalyzerUrl}
+                analysis={analyzerAnalysis}
+                setAnalysis={setAnalyzerAnalysis}
+                result={analyzerResult}
+                setResult={setAnalyzerResult}
+                actionSetsShown={analyzerActionSetsShown}
+                setActionSetsShown={setAnalyzerActionSetsShown}
+              />
+            </Suspense>
           </div>
         );
       case 'history':
-        return <HistoryScreen onViewAnalysis={handleViewAnalysis} />;
+        return <Suspense fallback={<div>Loading...</div>}><HistoryScreen onViewAnalysis={handleViewAnalysis} /></Suspense>;
       case 'notes':
-        return <NotesScreen
+        return <Suspense fallback={<div>Loading...</div>}><NotesScreen
           notes={notes}
           loading={loadingNotes}
           editingNote={editingNote}
@@ -195,25 +198,11 @@ const Index = () => {
           onSaveNote={handleSaveNote}
           onUpdateNote={handleUpdateNote}
           onDeleteNote={handleDeleteNote}
-        />;
+        /></Suspense>;
       case 'settings':
-        return <SettingsPage />;
+        return <Suspense fallback={<div>Loading...</div>}><SettingsPage /></Suspense>;
       default:
-        return (
-          <div className="space-y-8">
-            <HeroSection />
-            <LinkAnalyzer
-              url={analyzerUrl}
-              setUrl={setAnalyzerUrl}
-              analysis={analyzerAnalysis}
-              setAnalysis={setAnalyzerAnalysis}
-              result={analyzerResult}
-              setResult={setAnalyzerResult}
-              actionSetsShown={analyzerActionSetsShown}
-              setActionSetsShown={setAnalyzerActionSetsShown}
-            />
-          </div>
-        );
+        return null;
     }
   };
 

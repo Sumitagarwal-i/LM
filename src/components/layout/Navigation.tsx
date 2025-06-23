@@ -24,7 +24,8 @@ import {
   MessageSquare,
   Zap
 } from 'lucide-react';
-import logo1 from '../../assets/1.png';
+import logo1webp from '../../assets/1.webp';
+import logo1png from '../../assets/1.png';
 
 interface NavigationProps {
   activeTab: string;
@@ -72,7 +73,10 @@ export const Navigation: React.FC<NavigationProps> = ({
           {/* Logo */}
           <div className="flex items-center space-x-3 min-w-0 md:flex-none">
             <div className="flex items-center gap-2 min-w-0">
-              <img src={logo1} alt="LinkMage Logo" className="w-8 h-8 sm:w-10 sm:h-10 object-contain flex-shrink-0" />
+              <picture>
+                <source srcSet={logo1webp} type="image/webp" />
+                <img src={logo1png} alt="LinkMage Logo" className="w-8 h-8 sm:w-10 sm:h-10 object-contain flex-shrink-0" />
+              </picture>
               <div className="flex items-center gap-1 min-w-0">
                 <h1 className="text-xl sm:text-2xl font-bold tracking-tight via-white-800 bg-clip-text drop-shadow-lg font-sans truncate">
                   LinkMage
