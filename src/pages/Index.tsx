@@ -3,7 +3,6 @@ import { Navigation } from '@/components/layout/Navigation';
 import { LinkAnalyzer } from '@/components/analyzer/LinkAnalyzer';
 import { useAuth } from '@/contexts/AuthContext';
 import { guestStorage } from '@/utils/guestStorage';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface LinkHistoryItem {
@@ -60,12 +59,9 @@ const Index = () => {
         const guestNotes = guestStorage.getNotes();
         setNotes(guestNotes);
       } else {
-        const { data, error } = await supabase
-          .from('ai_notes')
-          .select('*')
-          .eq('user_id', user?.id)
-          .order('updated_at', { ascending: false });
-        if (error) throw error;
+        const response = await fetch(`/api/ai_notes?user_id=${user?.id}`);
+        if (!response.ok) throw new Error('Failed to fetch notes');
+        const data = await response.json();
         setNotes(data || []);
       }
     } catch (error) {

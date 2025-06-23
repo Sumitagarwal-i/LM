@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { ExternalLink, Eye, Trash2 } from 'lucide-react';
@@ -39,20 +38,16 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewAnalysis }) 
 
   const fetchHistory = async () => {
     try {
-      const { data, error } = await supabase
-        .from('link_history')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const response = await fetch('/api/link_history');
+      if (!response.ok) throw new Error('Failed to fetch history');
+      const data = await response.json();
       setHistory(data || []);
     } catch (error) {
       console.error('Error fetching history:', error);
       toast({
-        title: "Error",
-        description: "Failed to load your history",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to load your history',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
