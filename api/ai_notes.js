@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 export default async function handler(req, res) {
@@ -14,15 +14,17 @@ export default async function handler(req, res) {
 
   try {
     const { user_id } = req.query;
+    if (!user_id) {
+      return res.status(400).json({ error: 'Missing user_id' });
+    }
 
-    // Optional: Filter notes by user if needed
-    const query = supabase.from('ai_notes').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('ai_notes')
+      .select('*')
+      .eq('user_id', user_id)
+      .order('updated_at', { ascending: false });
 
-    if (user_id) query.eq('user_id', user_id);
-
-    const { data, error } = await query;
-
-    if (error) return res.status(500).json({ error });
+    if (error) return res.status(500).json({ error: error.message });
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ error: 'Unexpected error', details: err.message });

@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { ExternalLink, Eye, Trash2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LinkHistoryItem {
   id: string;
