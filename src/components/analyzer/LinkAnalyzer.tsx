@@ -7,8 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ActionsList } from '@/components/ActionsList';
 import { ResultPanel } from '@/components/ResultPanel';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEnhancedToast } from '@/hooks/use-toast';
-import { apiCall, ErrorHandler } from '@/lib/errorHandler';
+import { useToast } from '@/hooks/use-toast';
+import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { Loader2, Link as LinkIcon, X as XIcon, FileText } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
@@ -53,8 +53,10 @@ export const LinkAnalyzer: React.FC<LinkAnalyzerProps> = ({
 }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const { user } = useAuth();
-  const { showError, showSuccess } = useEnhancedToast();
+  const { toast } = useToast();
 
   // Supported content types for the docs modal
   const supportedContentTypes = [
@@ -73,35 +75,35 @@ export const LinkAnalyzer: React.FC<LinkAnalyzerProps> = ({
 
   const analyzeLink = async () => {
     if (!url.trim()) {
-      const error = ErrorHandler.createError(
-        'VALIDATION_ERROR',
-        'Missing URL',
-        'Please enter a valid URL to analyze',
-        'error',
-        true
-      );
-      showError(error);
+      toast({
+        title: "Missing URL",
+        description: "Please enter a valid URL to analyze",
+        variant: "destructive"
+      });
       return;
     }
 
     setIsAnalyzing(true);
     setAnalysis(null);
     setResult(null);
+    setAnalysisError(null);
     setActionSetsShown(1);
 
     try {
-      const data = await apiCall<LinkAnalysis>(
-        '/api/analyze-link',
-        {
-          method: 'POST',
-          body: JSON.stringify({ 
-            link: url, 
-            actionSet: 0 
-          }),
-        },
-        'analyzing link'
-      );
-      
+      const response = await fetch('/api/analyze-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          link: url, 
+          actionSet: 0 
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze link');
+      }
+
+      const data = await response.json();
       setAnalysis(data);
 
       // Save to history if user is logged in
@@ -110,7 +112,8 @@ export const LinkAnalyzer: React.FC<LinkAnalyzerProps> = ({
       }
 
     } catch (error) {
-      showError(error, () => analyzeLink());
+      console.error('Error analyzing link:', error);
+      setAnalysisError('Unable to analyze the provided link. Please try again.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -118,51 +121,53 @@ export const LinkAnalyzer: React.FC<LinkAnalyzerProps> = ({
 
   const saveToHistory = async (link: string, analysisData: any) => {
     try {
-      await apiCall(
-        '/api/link_history',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            user_id: user?.id,
-            link: link,
-            title: analysisData.title || null,
-            content_type: analysisData.type || null,
-            summary: analysisData.purpose || null,
-            analysis_data: analysisData
-          }),
-        },
-        'saving to history'
-      );
+      const response = await fetch('/api/link_history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user?.id,
+          link: link,
+          title: analysisData.title || null,
+          content_type: analysisData.type || null,
+          summary: analysisData.purpose || null,
+          analysis_data: analysisData
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to save to history');
     } catch (error) {
-      // Don't show error for history saving - it's not critical
       console.error('Error saving to history:', error);
+      // Don't show error for history saving - it's not critical
     }
   };
 
   const executeAction = async (title: string, description: string) => {
     setIsExecuting(true);
     setResult(null);
+    setActionError(null);
 
     try {
-      const data = await apiCall<ActionResult>(
-        '/api/execute-action',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            link: url,
-            action: title
-          }),
-        },
-        'executing action'
-      );
-      
+      const response = await fetch('/api/execute-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          link: url,
+          action: title
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to execute action');
+      }
+
+      const data = await response.json();
       setResult({
         content: data.content,
         actionTitle: title
       });
 
     } catch (error) {
-      showError(error, () => executeAction(title, description));
+      console.error('Error executing action:', error);
+      setActionError('Unable to execute the selected action. Please try again.');
     } finally {
       setIsExecuting(false);
     }
@@ -172,25 +177,29 @@ export const LinkAnalyzer: React.FC<LinkAnalyzerProps> = ({
     if (!analysis || isAnalyzing) return;
 
     setIsAnalyzing(true);
+    setAnalysisError(null);
 
     try {
-      const data = await apiCall<LinkAnalysis>(
-        '/api/analyze-link',
-        {
-          method: 'POST',
-          body: JSON.stringify({ 
-            link: url, 
-            actionSet: analysis.nextActionSet || 999 // Use 999 for dynamic AI actions
-          }),
-        },
-        'loading more actions'
-      );
-      
+      const response = await fetch('/api/analyze-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          link: url, 
+          actionSet: analysis.nextActionSet || 999 // Use 999 for dynamic AI actions
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load more actions');
+      }
+
+      const data = await response.json();
       setAnalysis(data);
       setActionSetsShown(actionSetsShown + 1);
 
     } catch (error) {
-      showError(error, () => loadMoreActions());
+      console.error('Error loading more actions:', error);
+      setAnalysisError('Unable to load more actions. Please try again.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -266,6 +275,10 @@ export const LinkAnalyzer: React.FC<LinkAnalyzerProps> = ({
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div>
+          <ErrorDisplay 
+            error={analysisError} 
+            onDismiss={() => setAnalysisError(null)}
+          />
           {isAnalyzing && !analysis ? (
             <Card>
               <CardHeader>
@@ -293,6 +306,10 @@ export const LinkAnalyzer: React.FC<LinkAnalyzerProps> = ({
         </div>
 
         <div>
+          <ErrorDisplay 
+            error={actionError} 
+            onDismiss={() => setActionError(null)}
+          />
           {result && (
             <div className="result-box">
               <ResultPanel

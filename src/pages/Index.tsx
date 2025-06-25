@@ -3,8 +3,8 @@ import { Navigation } from '@/components/layout/Navigation';
 import { LinkAnalyzer } from '@/components/analyzer/LinkAnalyzer';
 import { useAuth } from '@/contexts/AuthContext';
 import { guestStorage } from '@/utils/guestStorage';
-import { useEnhancedToast } from '@/hooks/use-toast';
-import { apiCall, ErrorHandler } from '@/lib/errorHandler';
+import { useToast } from '@/hooks/use-toast';
+import { ErrorDisplay } from '@/components/ErrorDisplay';
 
 interface LinkHistoryItem {
   id: string;
@@ -32,7 +32,7 @@ const Index = () => {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<LinkHistoryItem | null>(null);
   const { user } = useAuth();
-  const { showError, showSuccess, showWarning } = useEnhancedToast();
+  const { toast } = useToast();
   // Persisted state for LinkAnalyzer
   const [analyzerUrl, setAnalyzerUrl] = useState('');
   const [analyzerAnalysis, setAnalyzerAnalysis] = useState(null);
@@ -45,6 +45,8 @@ const Index = () => {
   const [showNewNoteForm, setShowNewNoteForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+  // Error states
+  const [notesError, setNotesError] = useState<string | null>(null);
 
   useEffect(() => {
     loadNotes();
@@ -55,16 +57,22 @@ const Index = () => {
 
   const loadNotes = async () => {
     setLoadingNotes(true);
+    setNotesError(null);
     try {
       if (isGuest) {
         const guestNotes = guestStorage.getNotes();
         setNotes(guestNotes);
       } else {
-        const data = await apiCall<AiNote[]>(`/api/ai_notes?user_id=${user?.id}`, {}, 'loading notes');
+        const response = await fetch(`/api/ai_notes?user_id=${user?.id}`);
+        if (!response.ok) {
+          throw new Error('Failed to load notes');
+        }
+        const data = await response.json();
         setNotes(data || []);
       }
     } catch (error) {
-      showError(error);
+      console.error('Error loading notes:', error);
+      setNotesError('Failed to load your notes. Please try again.');
     } finally {
       setLoadingNotes(false);
     }
@@ -75,22 +83,24 @@ const Index = () => {
       if (isGuest) {
         const newNote = guestStorage.saveNote({ title, content });
         setNotes(prev => [newNote, ...prev]);
-        showSuccess('Note saved locally');
+        toast({ title: 'Success', description: 'Note saved locally' });
       } else {
-        const data = await apiCall<AiNote>(
-          `/api/ai_notes?user_id=${user?.id}`,
-          {
-            method: 'POST',
-            body: JSON.stringify({ title, content }),
-          },
-          'saving note'
-        );
+        const response = await fetch(`/api/ai_notes?user_id=${user?.id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content }),
+        });
+        if (!response.ok) {
+          throw new Error('Failed to save note');
+        }
+        const data = await response.json();
         setNotes(prev => [data, ...prev]);
-        showSuccess('Note created successfully');
+        toast({ title: 'Success', description: 'Note created successfully' });
       }
       setShowNewNoteForm(false);
     } catch (error) {
-      showError(error, () => handleSaveNote(title, content));
+      console.error('Error saving note:', error);
+      toast({ title: 'Error', description: 'Failed to save note', variant: 'destructive' });
     }
   };
 
@@ -100,23 +110,25 @@ const Index = () => {
         const updatedNote = guestStorage.updateNote(id, { title, content });
         if (updatedNote) {
           setNotes(prev => prev.map(note => note.id === id ? updatedNote : note));
-          showSuccess('Note updated');
+          toast({ title: 'Success', description: 'Note updated' });
         }
       } else {
-        const data = await apiCall<AiNote>(
-          `/api/ai_notes/${id}?user_id=${user?.id}`,
-          {
-            method: 'PUT',
-            body: JSON.stringify({ title, content }),
-          },
-          'updating note'
-        );
+        const response = await fetch(`/api/ai_notes/${id}?user_id=${user?.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content }),
+        });
+        if (!response.ok) {
+          throw new Error('Failed to update note');
+        }
+        const data = await response.json();
         setNotes(prev => prev.map(note => note.id === id ? data : note));
-        showSuccess('Note updated successfully');
+        toast({ title: 'Success', description: 'Note updated successfully' });
       }
       setEditingNote(null);
     } catch (error) {
-      showError(error, () => handleUpdateNote(id, title, content));
+      console.error('Error updating note:', error);
+      toast({ title: 'Error', description: 'Failed to update note', variant: 'destructive' });
     }
   };
 
@@ -126,19 +138,22 @@ const Index = () => {
         const success = guestStorage.deleteNote(id);
         if (success) {
           setNotes(prev => prev.filter(note => note.id !== id));
-          showSuccess('Note deleted');
+          toast({ title: 'Success', description: 'Note deleted' });
         }
       } else {
-        await apiCall(
-          `/api/ai_notes/${id}?user_id=${user?.id}`,
-          { method: 'DELETE' },
-          'deleting note'
-        );
+        const response = await fetch(`/api/ai_notes/${id}?user_id=${user?.id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to delete note');
+        }
         setNotes(prev => prev.filter(note => note.id !== id));
-        showSuccess('Note deleted successfully');
+        toast({ title: 'Success', description: 'Note deleted successfully' });
       }
     } catch (error) {
-      showError(error, () => handleDeleteNote(id));
+      console.error('Error deleting note:', error);
+      toast({ title: 'Error', description: 'Failed to delete note', variant: 'destructive' });
     }
   };
 
@@ -173,20 +188,30 @@ const Index = () => {
       case 'history':
         return <Suspense fallback={<div>Loading...</div>}><HistoryScreen onViewAnalysis={handleViewAnalysis} /></Suspense>;
       case 'notes':
-        return <Suspense fallback={<div>Loading...</div>}><NotesScreen
-          notes={notes}
-          loading={loadingNotes}
-          editingNote={editingNote}
-          showNewNoteForm={showNewNoteForm}
-          searchTerm={searchTerm}
-          user={user}
-          setEditingNote={setEditingNote}
-          setShowNewNoteForm={setShowNewNoteForm}
-          setSearchTerm={setSearchTerm}
-          onSaveNote={handleSaveNote}
-          onUpdateNote={handleUpdateNote}
-          onDeleteNote={handleDeleteNote}
-        /></Suspense>;
+        return (
+          <div>
+            <ErrorDisplay 
+              error={notesError} 
+              onDismiss={() => setNotesError(null)}
+            />
+            <Suspense fallback={<div>Loading...</div>}>
+              <NotesScreen
+                notes={notes}
+                loading={loadingNotes}
+                editingNote={editingNote}
+                showNewNoteForm={showNewNoteForm}
+                searchTerm={searchTerm}
+                user={user}
+                setEditingNote={setEditingNote}
+                setShowNewNoteForm={setShowNewNoteForm}
+                setSearchTerm={setSearchTerm}
+                onSaveNote={handleSaveNote}
+                onUpdateNote={handleUpdateNote}
+                onDeleteNote={handleDeleteNote}
+              />
+            </Suspense>
+          </div>
+        );
       case 'settings':
         return <Suspense fallback={<div>Loading...</div>}><SettingsPage /></Suspense>;
       default:

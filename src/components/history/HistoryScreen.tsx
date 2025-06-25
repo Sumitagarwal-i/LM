@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEnhancedToast } from '@/hooks/use-toast';
-import { apiCall } from '@/lib/errorHandler';
+import { useToast } from '@/hooks/use-toast';
+import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { formatDistanceToNow } from 'date-fns';
 import { ExternalLink, Eye, Trash2 } from 'lucide-react';
 
@@ -26,8 +26,9 @@ interface HistoryScreenProps {
 export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewAnalysis }) => {
   const [history, setHistory] = useState<LinkHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
-  const { showError, showSuccess } = useEnhancedToast();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user && !user.is_anonymous) {
@@ -39,10 +40,14 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewAnalysis }) 
 
   const fetchHistory = async () => {
     try {
-      const data = await apiCall<LinkHistoryItem[]>(`/api/link_history?user_id=${user?.id}`, {}, 'fetching history');
+      setError(null);
+      const response = await fetch(`/api/link_history?user_id=${user?.id}`);
+      if (!response.ok) throw new Error('Failed to fetch history');
+      const data = await response.json();
       setHistory(data || []);
     } catch (error) {
-      showError(error, () => fetchHistory());
+      console.error('Error fetching history:', error);
+      setError('Failed to load your history. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -50,11 +55,24 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewAnalysis }) 
 
   const deleteHistoryItem = async (id: string) => {
     try {
-      await apiCall(`/api/link_history/${id}?user_id=${user?.id}`, { method: 'DELETE' }, 'deleting history item');
+      const response = await fetch(`/api/link_history/${id}?user_id=${user?.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error('Failed to delete history item');
+      
       setHistory(prev => prev.filter(item => item.id !== id));
-      showSuccess('History item removed successfully');
+      toast({
+        title: "Deleted",
+        description: "History item removed successfully"
+      });
     } catch (error) {
-      showError(error, () => deleteHistoryItem(id));
+      console.error('Error deleting history item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete history item",
+        variant: "destructive"
+      });
     }
   };
 
@@ -110,6 +128,11 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewAnalysis }) 
         <h2 className="text-2xl font-bold">My History</h2>
         <Badge variant="secondary">{history.length} items</Badge>
       </div>
+
+      <ErrorDisplay 
+        error={error} 
+        onDismiss={() => setError(null)}
+      />
 
       <div className="space-y-4">
         {history.map((item) => (
