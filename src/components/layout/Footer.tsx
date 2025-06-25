@@ -19,6 +19,16 @@ export const Footer: React.FC<FooterProps> = ({ onFeedbackModalOpen }) => {
             <span>Product</span>
             {/* <a href='https://qyvante.vercel.app/' target='_blank'><SquareArrowUpRight className="h-5 w-5"/></a> */}
           </div>
+
+          <a href="https://www.producthunt.com/products/linkmage?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-linkmage" target="_blank">
+            <img
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=981869&theme=light&t=1750867427787"
+              alt="LinkMage - Understand links like never before. AI actions for any URL | Product Hunt"
+              style={{ width: '250px', height: '54px' }}
+              width="250"
+              height="54"
+            />
+          </a>
           
           {/* <Button
             variant="ghost"
