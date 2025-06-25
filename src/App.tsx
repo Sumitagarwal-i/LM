@@ -9,7 +9,9 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from "@vercel/speed-insights/react"
+import { SpeedInsights } from "@vercel/speed-insights/react";
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import './App.css';
 
 const queryClient = new QueryClient();
 
@@ -104,30 +106,32 @@ setupApiRoutes();
 
 const App = () => {
   return (
-    <div
-      style={{ height: '100vh', overflowY: 'auto', background: '#000', WebkitOverflowScrolling: 'touch' }}
-    >
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <ThemeProvider>
-            <TooltipProvider>
-              <BrowserRouter>
-                <div className="min-h-screen bg-background text-foreground">
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </div>
-              </BrowserRouter>
-              <Toaster />
-              <Sonner />
-            </TooltipProvider>
-          </ThemeProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-      <Analytics/>
-      <SpeedInsights/>
-    </div>
+    <ErrorBoundary>
+      <div
+        style={{ height: '100vh', overflowY: 'auto', background: '#000', WebkitOverflowScrolling: 'touch' }}
+      >
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <ThemeProvider>
+              <TooltipProvider>
+                <BrowserRouter>
+                  <div className="min-h-screen bg-background text-foreground">
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </div>
+                </BrowserRouter>
+                <Toaster />
+                <Sonner />
+              </TooltipProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+        <Analytics/>
+        <SpeedInsights/>
+      </div>
+    </ErrorBoundary>
   );
 };
 

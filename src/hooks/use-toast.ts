@@ -13,6 +13,7 @@ type ToasterToast = ToastProps & {
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  retry?: () => void
 }
 
 const actionTypes = {
@@ -185,6 +186,82 @@ function useToast() {
     ...state,
     toast,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+  }
+}
+
+// Enhanced toast functions for different error types
+export function useEnhancedToast() {
+  const { toast, dismiss } = useToast()
+
+  const showError = React.useCallback((error: any, retry?: () => void) => {
+    let title = 'Error'
+    let description = 'An unexpected error occurred'
+    let variant: 'default' | 'destructive' = 'destructive'
+    let action: ToastActionElement | undefined
+
+    // Handle AppError type
+    if (error && typeof error === 'object' && 'userMessage' in error) {
+      title = error.severity === 'error' ? 'Error' : 
+              error.severity === 'warning' ? 'Warning' : 'Info'
+      description = error.userMessage
+      variant = error.severity === 'error' ? 'destructive' : 'default'
+      
+      // Add retry button for retryable errors
+      if (error.retryable && retry) {
+        action = {
+          altText: 'Try Again',
+          action: () => {
+            dismiss()
+            retry()
+          }
+        }
+      }
+    } else if (typeof error === 'string') {
+      description = error
+    } else if (error?.message) {
+      description = error.message
+    }
+
+    return toast({
+      title,
+      description,
+      variant,
+      action,
+      duration: error?.retryable ? 10000 : 5000, // Longer duration for retryable errors
+    })
+  }, [toast, dismiss])
+
+  const showSuccess = React.useCallback((title: string, description?: string) => {
+    return toast({
+      title,
+      description,
+      variant: 'default',
+    })
+  }, [toast])
+
+  const showWarning = React.useCallback((title: string, description?: string) => {
+    return toast({
+      title,
+      description,
+      variant: 'default',
+    })
+  }, [toast])
+
+  const showInfo = React.useCallback((title: string, description?: string) => {
+    return toast({
+      title,
+      description,
+      variant: 'default',
+    })
+  }, [toast])
+
+  return {
+    toast,
+    dismiss,
+    showError,
+    showSuccess,
+    showWarning,
+    showInfo,
   }
 }
 

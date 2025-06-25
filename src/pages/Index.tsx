@@ -3,7 +3,8 @@ import { Navigation } from '@/components/layout/Navigation';
 import { LinkAnalyzer } from '@/components/analyzer/LinkAnalyzer';
 import { useAuth } from '@/contexts/AuthContext';
 import { guestStorage } from '@/utils/guestStorage';
-import { useToast } from '@/hooks/use-toast';
+import { useEnhancedToast } from '@/hooks/use-toast';
+import { apiCall, ErrorHandler } from '@/lib/errorHandler';
 
 interface LinkHistoryItem {
   id: string;
@@ -31,7 +32,7 @@ const Index = () => {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<LinkHistoryItem | null>(null);
   const { user } = useAuth();
-  const { toast } = useToast();
+  const { showError, showSuccess, showWarning } = useEnhancedToast();
   // Persisted state for LinkAnalyzer
   const [analyzerUrl, setAnalyzerUrl] = useState('');
   const [analyzerAnalysis, setAnalyzerAnalysis] = useState(null);
@@ -59,93 +60,85 @@ const Index = () => {
         const guestNotes = guestStorage.getNotes();
         setNotes(guestNotes);
       } else {
-        const response = await fetch(`/api/ai_notes?user_id=${user?.id}`);
-        if (!response.ok) throw new Error('Failed to fetch notes');
-        const data = await response.json();
+        const data = await apiCall<AiNote[]>(`/api/ai_notes?user_id=${user?.id}`, {}, 'loading notes');
         setNotes(data || []);
       }
     } catch (error) {
-      console.error('Error fetching notes:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load your notes',
-        variant: 'destructive',
-      });
+      showError(error);
     } finally {
       setLoadingNotes(false);
     }
   };
 
-  const handleSaveNote = async (title, content) => {
+  const handleSaveNote = async (title: string, content: string) => {
     try {
       if (isGuest) {
         const newNote = guestStorage.saveNote({ title, content });
         setNotes(prev => [newNote, ...prev]);
-        toast({ title: 'Success', description: 'Note saved locally' });
+        showSuccess('Note saved locally');
       } else {
-        const response = await fetch(`/api/ai_notes?user_id=${user?.id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, content }),
-        });
-        if (!response.ok) throw new Error('Failed to save note');
-        const data = await response.json();
+        const data = await apiCall<AiNote>(
+          `/api/ai_notes?user_id=${user?.id}`,
+          {
+            method: 'POST',
+            body: JSON.stringify({ title, content }),
+          },
+          'saving note'
+        );
         setNotes(prev => [data, ...prev]);
-        toast({ title: 'Success', description: 'Note created successfully' });
+        showSuccess('Note created successfully');
       }
       setShowNewNoteForm(false);
     } catch (error) {
-      console.error('Error saving note:', error);
-      toast({ title: 'Error', description: 'Failed to save note', variant: 'destructive' });
+      showError(error, () => handleSaveNote(title, content));
     }
   };
 
-  const handleUpdateNote = async (id, title, content) => {
+  const handleUpdateNote = async (id: string, title: string, content: string) => {
     try {
       if (isGuest) {
         const updatedNote = guestStorage.updateNote(id, { title, content });
         if (updatedNote) {
           setNotes(prev => prev.map(note => note.id === id ? updatedNote : note));
-          toast({ title: 'Success', description: 'Note updated' });
+          showSuccess('Note updated');
         }
       } else {
-        const response = await fetch(`/api/ai_notes/${id}?user_id=${user?.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, content }),
-        });
-        if (!response.ok) throw new Error('Failed to update note');
-        const data = await response.json();
+        const data = await apiCall<AiNote>(
+          `/api/ai_notes/${id}?user_id=${user?.id}`,
+          {
+            method: 'PUT',
+            body: JSON.stringify({ title, content }),
+          },
+          'updating note'
+        );
         setNotes(prev => prev.map(note => note.id === id ? data : note));
-        toast({ title: 'Success', description: 'Note updated successfully' });
+        showSuccess('Note updated successfully');
       }
       setEditingNote(null);
     } catch (error) {
-      console.error('Error updating note:', error);
-      toast({ title: 'Error', description: 'Failed to update note', variant: 'destructive' });
+      showError(error, () => handleUpdateNote(id, title, content));
     }
   };
 
-  const handleDeleteNote = async (id) => {
+  const handleDeleteNote = async (id: string) => {
     try {
       if (isGuest) {
         const success = guestStorage.deleteNote(id);
         if (success) {
           setNotes(prev => prev.filter(note => note.id !== id));
-          toast({ title: 'Success', description: 'Note deleted' });
+          showSuccess('Note deleted');
         }
       } else {
-        const response = await fetch(`/api/ai_notes/${id}?user_id=${user?.id}`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (!response.ok) throw new Error('Failed to delete note');
+        await apiCall(
+          `/api/ai_notes/${id}?user_id=${user?.id}`,
+          { method: 'DELETE' },
+          'deleting note'
+        );
         setNotes(prev => prev.filter(note => note.id !== id));
-        toast({ title: 'Success', description: 'Note deleted successfully' });
+        showSuccess('Note deleted successfully');
       }
     } catch (error) {
-      console.error('Error deleting note:', error);
-      toast({ title: 'Error', description: 'Failed to delete note', variant: 'destructive' });
+      showError(error, () => handleDeleteNote(id));
     }
   };
 

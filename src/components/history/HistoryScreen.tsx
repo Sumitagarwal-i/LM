@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { useEnhancedToast } from '@/hooks/use-toast';
+import { apiCall } from '@/lib/errorHandler';
 import { formatDistanceToNow } from 'date-fns';
 import { ExternalLink, Eye, Trash2 } from 'lucide-react';
 
@@ -26,7 +27,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewAnalysis }) 
   const [history, setHistory] = useState<LinkHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const { toast } = useToast();
+  const { showError, showSuccess } = useEnhancedToast();
 
   useEffect(() => {
     if (user && !user.is_anonymous) {
@@ -38,17 +39,10 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewAnalysis }) 
 
   const fetchHistory = async () => {
     try {
-      const response = await fetch(`/api/link_history?user_id=${user?.id}`);
-      if (!response.ok) throw new Error('Failed to fetch history');
-      const data = await response.json();
+      const data = await apiCall<LinkHistoryItem[]>(`/api/link_history?user_id=${user?.id}`, {}, 'fetching history');
       setHistory(data || []);
     } catch (error) {
-      console.error('Error fetching history:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load your history',
-        variant: 'destructive'
-      });
+      showError(error, () => fetchHistory());
     } finally {
       setLoading(false);
     }
@@ -56,24 +50,11 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewAnalysis }) 
 
   const deleteHistoryItem = async (id: string) => {
     try {
-      const response = await fetch(`/api/link_history/${id}?user_id=${user?.id}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!response.ok) throw new Error('Failed to delete history item');
-      
+      await apiCall(`/api/link_history/${id}?user_id=${user?.id}`, { method: 'DELETE' }, 'deleting history item');
       setHistory(prev => prev.filter(item => item.id !== id));
-      toast({
-        title: "Deleted",
-        description: "History item removed successfully"
-      });
+      showSuccess('History item removed successfully');
     } catch (error) {
-      console.error('Error deleting history item:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete history item",
-        variant: "destructive"
-      });
+      showError(error, () => deleteHistoryItem(id));
     }
   };
 
