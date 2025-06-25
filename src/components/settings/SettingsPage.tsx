@@ -14,11 +14,31 @@ export const SettingsPage: React.FC = () => {
   const { toast } = useToast();
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
 
   useEffect(() => {
     if (user && !user.is_anonymous) {
       loadProfile();
     }
+  }, [user]);
+
+  // Load notification setting on mount
+  useEffect(() => {
+    const fetchNotificationSetting = async () => {
+      if (!user || user.is_anonymous) return;
+      setNotificationsLoading(true);
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('notifications_enabled')
+        .eq('user_id', user.id)
+        .single();
+      if (!error && data) {
+        setNotificationsEnabled(!!data.notifications_enabled);
+      }
+      setNotificationsLoading(false);
+    };
+    fetchNotificationSetting();
   }, [user]);
 
   const loadProfile = async () => {
@@ -88,6 +108,50 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
+  const handleNotificationToggle = async (checked: boolean) => {
+    setNotificationsEnabled(checked);
+    setNotificationsLoading(true);
+    if (user && !user.is_anonymous) {
+      const { error } = await supabase
+        .from('user_settings')
+        .update({ notifications_enabled: checked, updated_at: new Date().toISOString() })
+        .eq('user_id', user.id);
+      if (error) {
+        toast({ title: 'Error', description: 'Failed to update notification setting', variant: 'destructive' });
+        setNotificationsEnabled(!checked); // revert
+      } else {
+        toast({ title: checked ? 'Notifications enabled' : 'Notifications disabled', description: checked ? 'You will receive updates.' : 'You will not receive updates.' });
+      }
+    }
+    setNotificationsLoading(false);
+  };
+
+  const isGuest = !user || user.is_anonymous;
+
+  // Replace with your actual admin email
+  const ADMIN_EMAIL = 'sumitagar4@gmail.com';
+  const isAdmin = user && user.email === ADMIN_EMAIL;
+
+  const handleSendUpdates = async () => {
+    const message = window.prompt('Enter the update message to send to all users:');
+    if (!message) return;
+    try {
+      const res = await fetch('/api/send-updates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast({ title: 'Emails sent', description: `Sent to ${data.sent} users.` });
+      } else {
+        toast({ title: 'Error', description: data.error || 'Failed to send emails', variant: 'destructive' });
+      }
+    } catch (err) {
+      toast({ title: 'Error', description: 'Failed to send emails', variant: 'destructive' });
+    }
+  };
+
   if (!user || user.is_anonymous) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -140,11 +204,37 @@ export const SettingsPage: React.FC = () => {
               <Save className="h-4 w-4" />
               {loading ? 'Saving...' : 'Save Profile'}
             </Button>
+
+            {isAdmin && (
+              <Button onClick={handleSendUpdates} variant="outline" className="mt-4">
+                Admin: Send Update Emails
+              </Button>
+            )}
           </CardContent>
         </Card>
 
         {/* Account Actions */}
         <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Notifications</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-muted-foreground mb-4">
+              Enable to get updates and notifications about new features, tips, and important account activity.
+              {isGuest && (
+                <div className="text-xs text-red-500 mt-2">Sign in with your email to enable notifications.</div>
+              )}
+              {notificationsLoading && (
+                <div className="text-xs text-muted-foreground mt-2">Saving...</div>
+              )}
+            </div>
+              <Switch
+                checked={notificationsEnabled}
+                onCheckedChange={handleNotificationToggle}
+                id="notifications-switch"
+                disabled={isGuest || notificationsLoading}
+              />
+          </CardContent>
           <CardHeader>
             <CardTitle>Account</CardTitle>
           </CardHeader>
