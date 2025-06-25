@@ -1,4 +1,3 @@
-// /api/ai_notes.js
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -7,29 +6,16 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-  res.setHeader(
-    'Cache-Control',
-    'public, max-age=0, s-maxage=300, stale-while-revalidate=59'
-  );
-
   try {
+    const { id } = req.query;
     const { user_id } = req.query;
-    if (!user_id) {
-      return res.status(400).json({ error: 'Missing user_id' });
+    
+    if (!id || !user_id) {
+      return res.status(400).json({ error: 'Missing id or user_id' });
     }
 
-    if (req.method === 'GET') {
-      // Read notes
-      const { data, error } = await supabase
-        .from('ai_notes')
-        .select('*')
-        .eq('user_id', user_id)
-        .order('updated_at', { ascending: false });
-
-      if (error) return res.status(500).json({ error: error.message });
-      res.status(200).json(data);
-    } else if (req.method === 'POST') {
-      // Create note
+    if (req.method === 'PUT') {
+      // Update note
       const { title, content } = req.body;
       if (!title || !content) {
         return res.status(400).json({ error: 'Missing title or content' });
@@ -37,16 +23,28 @@ export default async function handler(req, res) {
 
       const { data, error } = await supabase
         .from('ai_notes')
-        .insert([{ title, content, user_id }])
+        .update({ title, content, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('user_id', user_id)
         .select()
         .single();
 
       if (error) return res.status(500).json({ error: error.message });
-      res.status(201).json(data);
+      res.status(200).json(data);
+    } else if (req.method === 'DELETE') {
+      // Delete note
+      const { error } = await supabase
+        .from('ai_notes')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user_id);
+
+      if (error) return res.status(500).json({ error: error.message });
+      res.status(204).end();
     } else {
       res.status(405).json({ error: 'Method not allowed' });
     }
   } catch (err) {
     res.status(500).json({ error: 'Unexpected error', details: err.message });
   }
-}
+} 

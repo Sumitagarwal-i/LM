@@ -83,12 +83,13 @@ const Index = () => {
         setNotes(prev => [newNote, ...prev]);
         toast({ title: 'Success', description: 'Note saved locally' });
       } else {
-        const { data, error } = await supabase
-          .from('ai_notes')
-          .insert([{ title, content, user_id: user?.id }])
-          .select()
-          .single();
-        if (error) throw error;
+        const response = await fetch(`/api/ai_notes?user_id=${user?.id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content }),
+        });
+        if (!response.ok) throw new Error('Failed to save note');
+        const data = await response.json();
         setNotes(prev => [data, ...prev]);
         toast({ title: 'Success', description: 'Note created successfully' });
       }
@@ -108,14 +109,13 @@ const Index = () => {
           toast({ title: 'Success', description: 'Note updated' });
         }
       } else {
-        const { data, error } = await supabase
-          .from('ai_notes')
-          .update({ title, content, updated_at: new Date().toISOString() })
-          .eq('id', id)
-          .eq('user_id', user?.id)
-          .select()
-          .single();
-        if (error) throw error;
+        const response = await fetch(`/api/ai_notes/${id}?user_id=${user?.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content }),
+        });
+        if (!response.ok) throw new Error('Failed to update note');
+        const data = await response.json();
         setNotes(prev => prev.map(note => note.id === id ? data : note));
         toast({ title: 'Success', description: 'Note updated successfully' });
       }
@@ -135,12 +135,11 @@ const Index = () => {
           toast({ title: 'Success', description: 'Note deleted' });
         }
       } else {
-        const { error } = await supabase
-          .from('ai_notes')
-          .delete()
-          .eq('id', id)
-          .eq('user_id', user?.id);
-        if (error) throw error;
+        const response = await fetch(`/api/ai_notes/${id}?user_id=${user?.id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!response.ok) throw new Error('Failed to delete note');
         setNotes(prev => prev.filter(note => note.id !== id));
         toast({ title: 'Success', description: 'Note deleted successfully' });
       }

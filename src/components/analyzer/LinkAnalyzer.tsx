@@ -7,7 +7,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ActionsList } from '@/components/ActionsList';
 import { ResultPanel } from '@/components/ResultPanel';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Link as LinkIcon, X as XIcon, FileText } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -123,16 +122,19 @@ export const LinkAnalyzer: React.FC<LinkAnalyzerProps> = ({
 
   const saveToHistory = async (link: string, analysisData: any) => {
     try {
-      await supabase
-        .from('link_history')
-        .insert([{
+      const response = await fetch('/api/link_history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           user_id: user?.id,
           link: link,
           title: analysisData.title || null,
           content_type: analysisData.type || null,
           summary: analysisData.purpose || null,
           analysis_data: analysisData
-        }]);
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to save to history');
     } catch (error) {
       console.error('Error saving to history:', error);
     }
@@ -195,7 +197,7 @@ export const LinkAnalyzer: React.FC<LinkAnalyzerProps> = ({
 
       const data = await response.json();
       setAnalysis(data);
-      setActionSetsShown(prev => prev + 1);
+      setActionSetsShown(actionSetsShown + 1);
 
     } catch (error) {
       console.error('Error loading more actions:', error);

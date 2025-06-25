@@ -7,7 +7,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { ExternalLink, Eye, Trash2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
 interface LinkHistoryItem {
   id: string;
@@ -39,7 +38,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewAnalysis }) 
 
   const fetchHistory = async () => {
     try {
-      const response = await fetch('/api/link_history');
+      const response = await fetch(`/api/link_history?user_id=${user?.id}`);
       if (!response.ok) throw new Error('Failed to fetch history');
       const data = await response.json();
       setHistory(data || []);
@@ -57,13 +56,11 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewAnalysis }) 
 
   const deleteHistoryItem = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('link_history')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
+      const response = await fetch(`/api/link_history/${id}?user_id=${user?.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error('Failed to delete history item');
       
       setHistory(prev => prev.filter(item => item.id !== id));
       toast({
