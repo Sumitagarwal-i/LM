@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -215,7 +216,7 @@ export function useEnhancedToast() {
             dismiss()
             retry()
           }
-        }, 'Try Again') as ToastActionElement
+        }, 'Try Again')
       }
     } else if (typeof error === 'string') {
       description = error
