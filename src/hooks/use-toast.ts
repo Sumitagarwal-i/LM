@@ -198,7 +198,6 @@ export function useEnhancedToast() {
     let title = 'Error'
     let description = 'An unexpected error occurred'
     let variant: 'default' | 'destructive' = 'destructive'
-    let action: ToastActionElement | undefined
 
     // Handle AppError type
     if (error && typeof error === 'object' && 'userMessage' in error) {
@@ -207,22 +206,17 @@ export function useEnhancedToast() {
       description = error.userMessage
       variant = error.severity === 'error' ? 'destructive' : 'default'
       
-      // Add retry button for retryable errors
+      // For retryable errors, we'll add a simple retry mechanism without JSX
       if (error.retryable && retry) {
-        // Since we're in a .ts file, we need to avoid JSX and use a different approach
-        // We'll pass the retry function in the toast data and handle it in the UI
         return toast({
           title,
-          description,
+          description: `${description} (Click to retry)`,
           variant,
           duration: 10000,
-          action: React.createElement(ToastAction, {
-            altText: 'Try Again',
-            onClick: () => {
-              dismiss()
-              retry()
-            }
-          }, 'Try Again')
+          onClick: () => {
+            dismiss()
+            retry()
+          }
         })
       }
     } else if (typeof error === 'string') {
