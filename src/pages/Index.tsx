@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { LinkAnalyzer } from '@/components/analyzer/LinkAnalyzer';
@@ -5,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { guestStorage } from '@/utils/guestStorage';
 import { useToast } from '@/hooks/use-toast';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
+import type { AiNote } from '@/components/notes/NotesScreen';
 
 interface LinkHistoryItem {
   id: string;
