@@ -34,6 +34,10 @@ interface Template {
   popular?: boolean;
 }
 
+interface TemplateSelectorProps {
+  onTemplateSelect: (templateId: string) => void;
+}
+
 const templates: Template[] = [
   {
     id: 'linkedin-post',
@@ -94,15 +98,20 @@ const templates: Template[] = [
   }
 ];
 
-export const TemplateSelector: React.FC = () => {
+export const TemplateSelector: React.FC<TemplateSelectorProps> = ({ onTemplateSelect }) => {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType | null>(null);
 
+  const handleTemplateSelect = (templateId: TemplateType) => {
+    setSelectedTemplate(templateId);
+    onTemplateSelect(templateId);
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-purple-400" />
-          <h3 className="font-semibold text-purple-300">Content Templates</h3>
+          <h3 className="font-semibold text-lg">Content Templates</h3>
         </div>
         <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">
           {templates.length} available
@@ -114,23 +123,27 @@ export const TemplateSelector: React.FC = () => {
           <Card 
             key={template.id}
             className={`
-              cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md
-              border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-pink-500/5
+              cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-lg
+              border-border/30 bg-card/30 backdrop-blur-sm
               ${selectedTemplate === template.id 
-                ? 'ring-2 ring-purple-500/50 bg-purple-500/10' 
-                : 'hover:bg-purple-500/10'
+                ? 'ring-2 ring-purple-500/50 bg-purple-500/10 border-purple-500/50' 
+                : 'hover:bg-card/50 hover:border-border/50'
               }
             `}
-            onClick={() => setSelectedTemplate(template.id)}
+            onClick={() => handleTemplateSelect(template.id)}
           >
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                  <template.icon className="h-4 w-4 text-purple-400" />
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  selectedTemplate === template.id 
+                    ? 'bg-purple-500/20 text-purple-400' 
+                    : 'bg-muted/30 text-muted-foreground'
+                }`}>
+                  <template.icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <CardTitle className="text-sm text-white">{template.name}</CardTitle>
+                    <CardTitle className="text-sm font-medium">{template.name}</CardTitle>
                     {template.popular && (
                       <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-800">
                         Popular
@@ -141,21 +154,21 @@ export const TemplateSelector: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-xs text-muted-foreground">{template.description}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{template.description}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {selectedTemplate && (
-        <div className="mt-4 p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
+        <div className="mt-6 p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
           <h4 className="font-medium text-purple-400 mb-2 flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
-            Template Selected
+            Template Ready
           </h4>
           <p className="text-sm text-muted-foreground">
-            {templates.find(t => t.id === selectedTemplate)?.name} template is ready. 
-            Paste your link and add a prompt to generate content.
+            {templates.find(t => t.id === selectedTemplate)?.name} template selected. 
+            Add your link and instructions in the main editor to generate content.
           </p>
         </div>
       )}
