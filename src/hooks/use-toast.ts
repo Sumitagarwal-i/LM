@@ -1,4 +1,3 @@
-
 import * as React from "react"
 
 import type {
@@ -210,13 +209,21 @@ export function useEnhancedToast() {
       
       // Add retry button for retryable errors
       if (error.retryable && retry) {
-        action = React.createElement(ToastAction, {
-          altText: 'Try Again',
-          onClick: () => {
-            dismiss()
-            retry()
-          }
-        }, 'Try Again')
+        // Since we're in a .ts file, we need to avoid JSX and use a different approach
+        // We'll pass the retry function in the toast data and handle it in the UI
+        return toast({
+          title,
+          description,
+          variant,
+          duration: 10000,
+          action: React.createElement(ToastAction, {
+            altText: 'Try Again',
+            onClick: () => {
+              dismiss()
+              retry()
+            }
+          }, 'Try Again')
+        })
       }
     } else if (typeof error === 'string') {
       description = error
@@ -228,8 +235,7 @@ export function useEnhancedToast() {
       title,
       description,
       variant,
-      action,
-      duration: error?.retryable ? 10000 : 5000, // Longer duration for retryable errors
+      duration: error?.retryable ? 10000 : 5000,
     })
   }, [toast, dismiss])
 
