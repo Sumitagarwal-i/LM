@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -209,13 +210,17 @@ export function useEnhancedToast() {
       
       // Add retry button for retryable errors
       if (error.retryable && retry) {
-        action = React.createElement(ToastAction, {
-          altText: 'Try Again',
-          onClick: () => {
-            dismiss()
-            retry()
-          }
-        }, 'Try Again')
+        action = (
+          <ToastAction
+            altText="Try Again"
+            onClick={() => {
+              dismiss()
+              retry()
+            }}
+          >
+            Try Again
+          </ToastAction>
+        ) as ToastActionElement
       }
     } else if (typeof error === 'string') {
       description = error
