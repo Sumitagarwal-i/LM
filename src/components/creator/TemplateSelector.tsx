@@ -11,7 +11,8 @@ import {
   FileText, 
   Users, 
   PenTool,
-  Hash
+  Hash,
+  Sparkles
 } from 'lucide-react';
 
 export type TemplateType = 
@@ -99,8 +100,11 @@ export const TemplateSelector: React.FC = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Content Templates</h3>
-        <Badge variant="outline" className="text-xs">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-purple-400" />
+          <h3 className="font-semibold text-purple-300">Content Templates</h3>
+        </div>
+        <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">
           {templates.length} available
         </Badge>
       </div>
@@ -111,21 +115,22 @@ export const TemplateSelector: React.FC = () => {
             key={template.id}
             className={`
               cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md
+              border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-pink-500/5
               ${selectedTemplate === template.id 
-                ? `ring-2 ring-${template.color}-500/50 bg-${template.color}-500/5` 
-                : 'hover:bg-muted/50'
+                ? 'ring-2 ring-purple-500/50 bg-purple-500/10' 
+                : 'hover:bg-purple-500/10'
               }
             `}
             onClick={() => setSelectedTemplate(template.id)}
           >
             <CardHeader className="pb-2">
               <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg bg-${template.color}-500/20 flex items-center justify-center`}>
-                  <template.icon className={`h-4 w-4 text-${template.color}-400`} />
+                <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                  <template.icon className="h-4 w-4 text-purple-400" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <CardTitle className="text-sm">{template.name}</CardTitle>
+                    <CardTitle className="text-sm text-white">{template.name}</CardTitle>
                     {template.popular && (
                       <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-800">
                         Popular
@@ -144,7 +149,10 @@ export const TemplateSelector: React.FC = () => {
 
       {selectedTemplate && (
         <div className="mt-4 p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
-          <h4 className="font-medium text-purple-400 mb-2">Template Selected</h4>
+          <h4 className="font-medium text-purple-400 mb-2 flex items-center gap-2">
+            <Sparkles className="h-4 w-4" />
+            Template Selected
+          </h4>
           <p className="text-sm text-muted-foreground">
             {templates.find(t => t.id === selectedTemplate)?.name} template is ready. 
             Paste your link and add a prompt to generate content.

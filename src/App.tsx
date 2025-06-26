@@ -54,20 +54,46 @@ const App = () => {
         ) : (
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-3xl font-bold mb-4">Creator Studio</h2>
+              <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Creator Studio
+              </h2>
               <p className="text-muted-foreground text-lg">
-                Select a template from the sidebar and paste your link to generate formatted content
+                Select a template from the sidebar, paste your link, and generate formatted content
               </p>
             </div>
             
-            {/* Creator Mode Interface - Placeholder for now */}
+            {/* Creator Mode Interface */}
             <div className="max-w-4xl mx-auto space-y-6">
-              <div className="glass p-8 rounded-xl">
-                <h3 className="text-xl font-semibold mb-4">Coming Soon: Creator Mode</h3>
-                <p className="text-muted-foreground">
-                  Template-based content generation with formatted outputs is being built. 
-                  For now, use General Mode for link analysis.
-                </p>
+              <div className="glass p-8 rounded-xl border border-purple-500/20 bg-gradient-to-br from-purple-500/10 to-pink-500/10">
+                <h3 className="text-xl font-semibold mb-4 text-purple-300">Template-Based Content Generation</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-muted-foreground">Choose a template from the left sidebar</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-muted-foreground">Paste your link in the input field</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-muted-foreground">Add your custom prompt or instructions</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-muted-foreground">Use refinement tools on the right sidebar</span>
+                  </div>
+                </div>
+                
+                <div className="mt-6 p-4 rounded-lg bg-purple-500/20 border border-purple-500/30">
+                  <p className="text-sm text-purple-200">
+                    🚀 <strong>V1 Features Available:</strong><br/>
+                    • Template Selection (LinkedIn, Twitter, Newsletter, etc.)<br/>
+                    • Content Refinement Tools<br/>
+                    • Export & Share Options<br/>
+                    • Mode Switching (General ↔ Creator)
+                  </p>
+                </div>
               </div>
             </div>
           </div>
