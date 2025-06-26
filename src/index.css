@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -171,6 +172,14 @@
     @apply hover:bg-muted/50 transition-colors;
   }
 
+  /* Glass morphism effects */
+  .glass {
+    @apply bg-card/20 backdrop-blur-lg border border-border/30;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
   /* Glow effects */
   .glow-primary {
     box-shadow: 0 0 20px hsla(var(--primary), 0.15);
@@ -195,11 +204,6 @@
     @apply bg-gradient-to-r from-primary via-primary/90 to-primary/80 bg-clip-text text-transparent;
   }
 
-  /* Glass morphism effects */
-  .glass {
-    @apply bg-background/80 backdrop-blur-lg border border-border/50;
-  }
-
   /* Modern button effects */
   .btn-glow {
     @apply transition-all duration-200;
@@ -218,6 +222,10 @@
 
   .slide-up {
     animation: slideUp 0.6s ease-out;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
   }
 
   @keyframes fadeIn {
@@ -254,4 +262,35 @@
   *::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
   }
+}
+
+/* Studio Layout Specific Styles */
+.studio-panel {
+  @apply backdrop-blur-xl bg-card/50 border-border/50;
+}
+
+/* Creator Mode Specific Colors */
+.creator-theme .bg-primary {
+  @apply bg-purple-600;
+}
+
+.creator-theme .text-primary {
+  @apply text-purple-400;
+}
+
+.creator-theme .border-primary {
+  @apply border-purple-500;
+}
+
+/* General Mode Specific Colors */
+.general-theme .bg-primary {
+  @apply bg-blue-600;
+}
+
+.general-theme .text-primary {
+  @apply text-blue-400;
+}
+
+.general-theme .border-primary {
+  @apply border-blue-500;
 }
